@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "maxwell",
+  "project_id": "84e25eca-3055-4b5e-9546-ddc1d5687bc5"
+}
