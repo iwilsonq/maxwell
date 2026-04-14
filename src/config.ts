@@ -1,0 +1,78 @@
+import { existsSync, readFileSync, writeFileSync } from "fs";
+import { resolve, dirname } from "path";
+
+export interface TelegramConfig {
+  enabled: boolean;
+  bot_token?: string;
+  chat_ids?: number[];
+}
+
+export interface SchedulerConfig {
+  morning_brief?: string;
+  enabled?: boolean;
+}
+
+export interface MemoryConfig {
+  conversation_window: number;
+}
+
+export interface MaxwellConfig {
+  provider: "anthropic";
+  model: string;
+  max_tokens: number;
+  temperature: number;
+  telegram: TelegramConfig;
+  scheduler?: SchedulerConfig;
+  memory?: MemoryConfig;
+}
+
+const DEFAULT_CONFIG: MaxwellConfig = {
+  provider: "anthropic",
+  model: "claude-sonnet-4-20250514",
+  max_tokens: 4096,
+  temperature: 0.7,
+  telegram: {
+    enabled: false,
+  },
+  scheduler: {
+    enabled: false,
+  },
+  memory: {
+    conversation_window: 50,
+  },
+};
+
+function getConfigPath(): string {
+  return resolve(process.cwd(), "storage", "config.json");
+}
+
+export function loadConfig(): MaxwellConfig {
+  const configPath = getConfigPath();
+
+  if (!existsSync(configPath)) {
+    const dir = dirname(configPath);
+    if (!existsSync(dir)) {
+      Bun.mkdir(dir, { recursive: true });
+    }
+    saveConfig(DEFAULT_CONFIG);
+    return DEFAULT_CONFIG;
+  }
+
+  try {
+    const content = readFileSync(configPath, "utf-8");
+    const loaded = JSON.parse(content);
+    return { ...DEFAULT_CONFIG, ...loaded };
+  } catch (error) {
+    console.error("Failed to load config:", error);
+    return DEFAULT_CONFIG;
+  }
+}
+
+export function saveConfig(config: MaxwellConfig): void {
+  const configPath = getConfigPath();
+  writeFileSync(configPath, JSON.stringify(config, null, 2));
+}
+
+export function getApiKey(): string | undefined {
+  return process.env.ANTHROPIC_API_KEY;
+}

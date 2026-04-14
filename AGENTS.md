@@ -1,4 +1,4 @@
-# Agent Instructions
+# Maxwell - Personal AI Assistant
 
 This project uses **bd** (beads) for issue tracking. Run `bd prime` for full workflow context.
 
@@ -6,10 +6,9 @@ This project uses **bd** (beads) for issue tracking. Run `bd prime` for full wor
 
 ```bash
 bd ready              # Find available work
-bd show <id>          # View issue details
+bd show <id>         # View issue details
 bd update <id> --claim  # Claim work atomically
-bd close <id>         # Complete work
-bd dolt push          # Push beads data to remote
+bd close <id>        # Complete work
 ```
 
 ## Non-Interactive Shell Commands
@@ -30,55 +29,44 @@ rm -rf directory            # NOT: rm -r directory
 cp -rf source dest          # NOT: cp -r source dest
 ```
 
-**Other commands that may prompt:**
-- `scp` - use `-o BatchMode=yes` for non-interactive
-- `ssh` - use `-o BatchMode=yes` to fail instead of prompting
-- `apt-get` - use `-y` flag
-- `brew` - use `HOMEBREW_NO_AUTO_UPDATE=1` env var
-
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-## Beads Issue Tracker
-
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
-
-### Quick Reference
+## Build & Run
 
 ```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
+# Install dependencies
+bun install
+
+# Run development
+bun run src/index.ts
+
+# Set required environment variables
+export ANTHROPIC_API_KEY="sk-ant-..."
 ```
 
-### Rules
+## Architecture
 
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
+```
+src/
+├── index.ts           # Entry point
+├── config.ts         # Configuration management
+├── agent/
+│   ├── engine.ts     # AI orchestration
+│   ├── prompts.ts    # System prompts/persona
+│   ├── tools.ts      # Tool definitions
+│   └── execute.ts    # Tool execution
+├── providers/
+│   └── anthropic.ts  # Claude API client
+├── channels/
+│   └── telegram/     # Telegram bot adapter
+└── memory/
+    └── conversation.ts  # Chat history storage
 
-## Session Completion
+storage/
+├── config.json       # User configuration
+└── memory/           # Conversation history (JSON by date)
+```
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+## Dependencies
 
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-<!-- END BEADS INTEGRATION -->
+- **bun** - Runtime (v1.3+)
+- **grammy** - Telegram bot framework
+- **@beads/bd** - Task tracking (install separately: `bun add -g @beads/bd`)
