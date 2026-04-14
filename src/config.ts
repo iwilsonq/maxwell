@@ -47,18 +47,18 @@ function getConfigPath(): string {
 }
 
 function applyEnvOverrides(config: MaxwellConfig): MaxwellConfig {
-  if (process.env.ANTHROPIC_API_KEY) {
+  if (Bun.env.ANTHROPIC_API_KEY) {
     console.log("[Config] Using ANTHROPIC_API_KEY from environment");
   }
 
-  if (process.env.TELEGRAM_BOT_TOKEN) {
-    config.telegram.bot_token = process.env.TELEGRAM_BOT_TOKEN;
+  if (Bun.env.TELEGRAM_BOT_TOKEN) {
+    config.telegram.bot_token = Bun.env.TELEGRAM_BOT_TOKEN;
     config.telegram.enabled = true;
     console.log("[Config] Using TELEGRAM_BOT_TOKEN from environment");
   }
 
-  if (process.env.MAXWELL_MODEL) {
-    config.model = process.env.MAXWELL_MODEL;
+  if (Bun.env.MAXWELL_MODEL) {
+    config.model = Bun.env.MAXWELL_MODEL;
     console.log(`[Config] Using model from MAXWELL_MODEL: ${config.model}`);
   }
 
@@ -95,5 +95,5 @@ export function saveConfig(config: MaxwellConfig): void {
 }
 
 export function getApiKey(): string | undefined {
-  return process.env.ANTHROPIC_API_KEY;
+  return Bun.env.ANTHROPIC_API_KEY;
 }
