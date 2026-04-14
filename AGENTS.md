@@ -29,17 +29,29 @@ rm -rf directory            # NOT: rm -r directory
 cp -rf source dest          # NOT: cp -r source dest
 ```
 
+## Environment Variables
+
+Sensitive values should be set via environment variables, not in config files.
+
+```bash
+# Required
+export ANTHROPIC_API_KEY="sk-ant-..."
+
+# Optional
+export TELEGRAM_BOT_TOKEN="your_telegram_bot_token"   # Enables Telegram
+export MAXWELL_MODEL="claude-sonnet-4-20250514"       # Override model
+```
+
 ## Build & Run
 
 ```bash
 # Install dependencies
 bun install
 
-# Run development
-bun run src/index.ts
-
-# Set required environment variables
+# Run (set env vars first)
 export ANTHROPIC_API_KEY="sk-ant-..."
+export TELEGRAM_BOT_TOKEN="..."
+bun run src/index.ts
 ```
 
 ## Architecture

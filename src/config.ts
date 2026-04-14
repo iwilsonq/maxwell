@@ -46,6 +46,25 @@ function getConfigPath(): string {
   return resolve(process.cwd(), "storage", "config.json");
 }
 
+function applyEnvOverrides(config: MaxwellConfig): MaxwellConfig {
+  if (process.env.ANTHROPIC_API_KEY) {
+    console.log("[Config] Using ANTHROPIC_API_KEY from environment");
+  }
+
+  if (process.env.TELEGRAM_BOT_TOKEN) {
+    config.telegram.bot_token = process.env.TELEGRAM_BOT_TOKEN;
+    config.telegram.enabled = true;
+    console.log("[Config] Using TELEGRAM_BOT_TOKEN from environment");
+  }
+
+  if (process.env.MAXWELL_MODEL) {
+    config.model = process.env.MAXWELL_MODEL;
+    console.log(`[Config] Using model from MAXWELL_MODEL: ${config.model}`);
+  }
+
+  return config;
+}
+
 export function loadConfig(): MaxwellConfig {
   const configPath = getConfigPath();
 
@@ -54,14 +73,16 @@ export function loadConfig(): MaxwellConfig {
     if (!existsSync(dir)) {
       Bun.mkdir(dir, { recursive: true });
     }
+    const config = applyEnvOverrides(DEFAULT_CONFIG);
     saveConfig(DEFAULT_CONFIG);
-    return DEFAULT_CONFIG;
+    return config;
   }
 
   try {
     const content = readFileSync(configPath, "utf-8");
     const loaded = JSON.parse(content);
-    return { ...DEFAULT_CONFIG, ...loaded };
+    const config = { ...DEFAULT_CONFIG, ...loaded };
+    return applyEnvOverrides(config);
   } catch (error) {
     console.error("Failed to load config:", error);
     return DEFAULT_CONFIG;
